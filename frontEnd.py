@@ -5,6 +5,7 @@ import sys
 
 class FrontEnd:
     def __init__(self, services):
+        self.services = services
         while (True):
             line = input("Transaction code: ")
             transactionCode = line.split(" ")[0]
@@ -63,7 +64,7 @@ def main():
                         help="The absolute location of the valid services file")
     arguments = parser.parse_args()
     with open(arguments.services) as services:
-        FrontEnd(services)
+        FrontEnd(services.read().split("\n"))
 
 
 main()
