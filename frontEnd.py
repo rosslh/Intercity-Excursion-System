@@ -8,11 +8,13 @@ import argparse
 import sys
 
 
+# Class for the FrontEnd project
 class FrontEnd:
-    numCancelledTickets = 0
-    numChangedTickets = 0
-    sessionType = -1
+    numCancelledTickets = 0  # counts the number of tickets already cancelled
+    numChangedTickets = 0  # counts the number of tickets already changed
+    sessionType = -1  # indicates whether FrontEnd is logged in, and if so, whether it’s in planner mode or agent mode
 
+    # initializes the FrontEnd object
     def __init__(self, services):
         while (True):
             line = input("Transaction code: ").split(" ")
@@ -34,7 +36,7 @@ class FrontEnd:
             else:
                 logError("Invalid transaction code")
 
-    # Method for login
+    # logs the user in as either a planner or an agent and reads in the valid services file
     def login(self, data, services):
         if self.sessionType != -1:
             logError("Already logged in")
@@ -58,6 +60,7 @@ class FrontEnd:
         self.recordTransaction("EOS")
         self.sessionType = -1
 
+    # creates a service, given a service number, date, and service name
     def createService(self, data):
         if self.sessionType == -1:
             logError("Not logged in")
@@ -74,6 +77,7 @@ class FrontEnd:
         else:
             logError("Invalid service")
 
+    #  deletes a service, given a service number, date, and service name
     def deleteService(self, data):
         if self.sessionType == -1:
             logError("Not logged in")
@@ -94,8 +98,8 @@ class FrontEnd:
             #         self.validServicesFile.write(service)
         else:
             logError("Invalid service")
-    # Method for sellticket, takes a the sellticket command as input, verifies its correctness and writes it to the transaction summary file
 
+    # Method for sellticket, takes a the sellticket command as input, verifies its correctness and writes it to the transaction summary file
     def sellTicket(self, data):
         if self.sessionType == -1:
             logError("Not logged in")
@@ -117,6 +121,7 @@ class FrontEnd:
         else:
             self.recordTransaction(data)
 
+    #  takes a service number and the number of tickets and cancels that many tickets
     def cancelTicket(self, data):
         if self.sessionType == -1:
             logError("Not logged in")
@@ -141,6 +146,7 @@ class FrontEnd:
         else:
             logError("Invalid service number")
 
+    #  takes a old service number, a new service number, and a number of tickets and changes that many tickets
     def changeTicket(self, data):
         if self.sessionType == -1:
             logError("Not logged in")
@@ -160,6 +166,7 @@ class FrontEnd:
         else:
             logError("Invalid service number")
 
+    #  returns boolean of whether a service number already exists in the valid services file
     def serviceAlreadyExists(self, serviceNumber):
         listOfNumbers = self.validServicesFile
         for line in listOfNumbers:
@@ -167,6 +174,7 @@ class FrontEnd:
                 return True
         return False
 
+    #  returns boolean of whether a service number, date, and name are valid
     def isValidService(self, serviceNumber, date, serviceName):
         if (len(serviceName) < 3) or (len(serviceName) > 39):
             return False
@@ -191,12 +199,14 @@ class FrontEnd:
         # If it passes all of the tests above, it's a valid service
         return self.isValidServiceNumber(serviceNumber)
 
+    # returns boolean of whether a service number is valid
     def isValidServiceNumber(self, num):
         try:
             return 10000 < int(num) < 99999
         except TypeError:
             return False
 
+    # records a transaction to the transaction summary file
     def recordTransaction(self, transaction):
         output = ""
         filePath = "transactionSummaryFile.txt"
@@ -209,10 +219,12 @@ class FrontEnd:
             transactionFile.write(output)
 
 
+# prints a message to stderr
 def logError(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
+# Instantiates the FrontEnd object. Takes the location of the valid services file as a command-line argument
 def main():
     parser = argparse.ArgumentParser(description='Initiatiate the front end')
     parser.add_argument("--services", type=str,
