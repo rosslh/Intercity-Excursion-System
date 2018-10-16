@@ -1,3 +1,8 @@
+'''comment at beginning of main program, documenting:
+overall program intention,
+input and output files,
+how the program is intended to be run'''
+
 from __future__ import print_function
 import argparse
 import sys
@@ -29,7 +34,8 @@ class FrontEnd:
                 self.changeTicket(line)
             else:
                 logError("Invalid transaction code")
-
+    
+    #Method for login
     def login(self, data):
         if self.sessionType != -1:
             logError("Already logged in")
@@ -47,6 +53,7 @@ class FrontEnd:
             self.sessionType = -1
             logError("Invalid login")
 
+    #Method for logout takes logout command as input, ensures user is logged in, writes EOS to transaction summary file and logs out
     def logout(self, data):
         if self.sessionType != "agent" and self.sessionType != "planner":
             logError("Must be logged in")
@@ -95,6 +102,7 @@ class FrontEnd:
                     validServicesFile.write(service)
             validServicesFile.close()
 
+    #Method for sellticket, takes a the sellticket command as input, verifies its correctness and writes it to the transaction summary file        
     def sellTicket(self, data):
         if self.sessionType == -1:
             logError("Not logged in")
