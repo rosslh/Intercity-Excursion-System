@@ -14,12 +14,11 @@ class FrontEnd:
     sessionType = -1
 
     def __init__(self, services):
-        self.services = services
         while (True):
             line = input("Transaction code: ").split(" ")
             transactionCode = line[0]
             if(transactionCode == "login"):
-                self.login(line)
+                self.login(line, services)
             elif(transactionCode == "logout"):
                 self.logout(line)
             elif(transactionCode == "createservice"):
@@ -34,9 +33,9 @@ class FrontEnd:
                 self.changeTicket(line)
             else:
                 logError("Invalid transaction code")
-    
-    #Method for login
-    def login(self, data):
+
+    # Method for login
+    def login(self, data, services):
         if self.sessionType != -1:
             logError("Already logged in")
             return
@@ -45,15 +44,13 @@ class FrontEnd:
             return
         if data[1] == "agent" or data[1] == "planner":
             self.sessionType = data[1]
-            self.recordTransaction(data)
-            with open(sys.argv[2]) as f:
-                self.services = f.read().splitlines()
+            self.validServicesFile = services
             print("Logged in as", self.sessionType)
         else:
             self.sessionType = -1
             logError("Invalid login")
 
-    #Method for logout takes logout command as input, ensures user is logged in, writes EOS to transaction summary file and logs out
+    # Method for logout takes logout command as input, ensures user is logged in, writes EOS to transaction summary file and logs out
     def logout(self, data):
         if self.sessionType != "agent" and self.sessionType != "planner":
             logError("Must be logged in")
@@ -71,9 +68,8 @@ class FrontEnd:
         serviceNumber = data[1]
         date = data[2]
         serviceName = data[3]
-        validServicesFile = open('validServicesFile.txt', 'a+')
         if self.isValidService(serviceNumber, date, serviceName) and not self.serviceAlreadyExists(serviceNumber):
-            validServicesFile.write(serviceNumber + '\n')
+            # self.validServicesFile.write(serviceNumber + '\n')
             self.recordTransaction(data)
         else:
             logError("Invalid service")
@@ -82,7 +78,7 @@ class FrontEnd:
         if self.sessionType == -1:
             logError("Not logged in")
             return
-        if len(data) != 3:
+        if len(data) != 4:
             logError("Invalid service for deleteService")
             return
         serviceNumber = data[1]
@@ -91,18 +87,15 @@ class FrontEnd:
         # placeholder date
         if self.isValidService(serviceNumber, date, serviceName) and self.serviceAlreadyExists(serviceNumber):
             self.recordTransaction(data)
+            # listOfServices = self.validServicesFile.readlines()
 
-            validServicesFile = open('validServicesFile.txt', 'r')
-            listOfServices = validServicesFile.readlines()
-            validServicesFile.close
+            # for service in listOfServices:
+            #     if service != (serviceNumber + '\n'):
+            #         self.validServicesFile.write(service)
+        else:
+            logError("Invalid service")
+    # Method for sellticket, takes a the sellticket command as input, verifies its correctness and writes it to the transaction summary file
 
-            validServicesFile = open('validServicesFile.txt', "w")
-            for service in listOfServices:
-                if service != (serviceNumber + '\n'):
-                    validServicesFile.write(service)
-            validServicesFile.close()
-
-    #Method for sellticket, takes a the sellticket command as input, verifies its correctness and writes it to the transaction summary file        
     def sellTicket(self, data):
         if self.sessionType == -1:
             logError("Not logged in")
@@ -119,23 +112,19 @@ class FrontEnd:
             logError("Invalid service number")
             return
         if (not(self.serviceAlreadyExists(num))):
-            logError("Service numebr already exists")
+            logError("Service number does not exist")
             return
         else:
-            self.recordTransaction(
-                "SEL %s %s 00000 **** 0" % (num, numtickets))
+            self.recordTransaction(data)
 
     def cancelTicket(self, data):
-        if self.sessionType == -1:
-            logError("Not logged in")
-            return
         if self.sessionType == -1:
             logError("Not logged in")
             return
         if len(data) != 3:
             logError("Invalid arguments")
             return
-        if data[1] in self.services:
+        if self.serviceAlreadyExists(data[1]):
             if self.sessionType == "agent":
                 if int(data[2]) > 10:
                     logError("Invalid ticket amount for agent")
@@ -143,15 +132,12 @@ class FrontEnd:
                     logError("Invalid ticket amount for planner")
                 else:
                     self.numCancelledTickets += int(data[2])
-                    transaction = 'CAN '+data[1] + \
-                        ' '+data[2]+'0 NNNNNN YYYYMMDD'
-                    self.recordTransaction(transaction)
+                    self.recordTransaction(data)
 
             else:
                 self.numCancelledTickets += int(data[2])
-                transaction = 'CAN '+data[1]+' '+data[2]+'0 NNNNNN YYYYMMDD'
-                self.recordTransaction(transaction)
-                # print(data[2], 'tickets cancelled')
+                self.recordTransaction(data)
+
         else:
             logError("Invalid service number")
 
@@ -175,7 +161,7 @@ class FrontEnd:
             logError("Invalid service number")
 
     def serviceAlreadyExists(self, serviceNumber):
-        listOfNumbers = validServicesFile.read().split('\n')
+        listOfNumbers = self.validServicesFile
         for line in listOfNumbers:
             if serviceNumber == line:
                 return True
@@ -186,7 +172,6 @@ class FrontEnd:
             return False
         if serviceName[0] == ' ' or serviceName[-1] == ' ':
             return False
-        validServicesFile = open('validServicesFile.txt', 'r')
 
         # Verifying if appropriate date
         if len(date) != 8:
@@ -213,9 +198,15 @@ class FrontEnd:
             return False
 
     def recordTransaction(self, transaction):
+        output = ""
         filePath = "transactionSummaryFile.txt"
+        if (transaction[0] == "changeticket"):
+            output = "CHG " + " ".join(transaction[1:]) + "\n"
+        else:
+            output = transaction[0][:3].upper() + " " + \
+                " ".join(transaction[1:]) + "\n"
         with open(filePath, "a+") as transactionFile:
-            transactionFile.write("{}\n".format(" ".join(transaction)))
+            transactionFile.write(output)
 
 
 def logError(*args, **kwargs):
