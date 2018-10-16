@@ -52,7 +52,7 @@ class FrontEnd:
             self.sessionType = -1
             logError("Invalid login")
 
-    # Method for logout takes logout command as input, ensures user is logged in, writes EOS to transaction summary file and logs out
+    # takes logout command as input, ensures user is logged in, writes EOS to transaction summary file and logs out
     def logout(self, data):
         if self.sessionType != "agent" and self.sessionType != "planner":
             logError("Must be logged in")
@@ -99,7 +99,7 @@ class FrontEnd:
         else:
             logError("Invalid service")
 
-    # Method for sellticket, takes a the sellticket command as input, verifies its correctness and writes it to the transaction summary file
+    # takes a the sellticket command as input, verifies its correctness and writes it to the transaction summary file
     def sellTicket(self, data):
         if self.sessionType == -1:
             logError("Not logged in")
