@@ -4,6 +4,10 @@ import sys
 
 
 class FrontEnd:
+    numCancelledTickets = 0
+    numChangedTickets = 0
+    sessionType = -1
+
     def __init__(self, services):
         self.services = services
         while (True):
@@ -13,15 +17,15 @@ class FrontEnd:
                 self.login(line)
             elif(transactionCode == "logout"):
                 self.logout(line)
-            elif(transactionCode == "createService"):
+            elif(transactionCode == "createservice"):
                 self.createService(line)
-            elif(transactionCode == "deleteService"):
+            elif(transactionCode == "deleteservice"):
                 self.deleteService(line)
-            elif(transactionCode == "sellTicket"):
+            elif(transactionCode == "sellticket"):
                 self.sellTicket(line)
-            elif(transactionCode == "cancelTicket"):
+            elif(transactionCode == "cancelticket"):
                 self.cancelTicket(line)
-            elif(transactionCode == "changeTicket"):
+            elif(transactionCode == "changeticket"):
                 self.changeTicket(line)
             else:
                 logError("Invalid transaction code")
@@ -48,10 +52,32 @@ class FrontEnd:
         pass
 
     def changeTicket(self, data):
-        pass
+        splitData = data.split(" ")
+        if (len(splitData) != 4):
+            logError(
+                "Transaction should be of form: changeticket {old service number} {new service number} {number of tickets}")
+            return
+        oldServiceNum = splitData[1]
+        newServiceNum = splitData[2]
+        numTickets = int(splitData[3])
+        if (self.numChangedTickets + numTickets >= 20 and self.sessionType != "planner"):
+            logError("Too many changed tickets")
+        if (self.isValidServiceNumber(oldServiceNum) and self.isValidServiceNumber(newServiceNum)):
+            self.numChangedTickets += numTickets
+            self.recordTransaction(data)
+        else:
+            logError("Invalid service number")
+
+    def isValidServiceNumber(self, num):
+        try:
+            return 10000 < int(num) < 99999
+        except TypeError:
+            return False
 
     def recordTransaction(self, transaction):
-        pass
+        filePath = "transactions.txt"
+        with open(filePath, "a+") as transactionFile:
+            transactionFile.write("{}\n".format(transaction))
 
 
 def logError(*args, **kwargs):
