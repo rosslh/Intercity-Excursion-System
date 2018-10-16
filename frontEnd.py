@@ -115,9 +115,6 @@ class FrontEnd:
         if (not(self.isValidServiceNumber(num))):
             logError("Invalid service number")
             return
-        if (not(self.serviceAlreadyExists(num))):
-            logError("Service number does not exist")
-            return
         else:
             self.recordTransaction(data)
 
