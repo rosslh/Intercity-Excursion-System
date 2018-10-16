@@ -97,8 +97,8 @@ class FrontEnd:
             validServicesFile.close()
 
     def sellTicket(self, data):
-        if self.sessionType != -1:
-            logError("Already logged in")
+        if self.sessionType == -1:
+            logError("Not logged in")
             return
         splitData = data.split()
         if len(splitData) != 3:
