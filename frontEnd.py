@@ -100,17 +100,19 @@ class FrontEnd:
         if self.sessionType == -1:
             logError("Not logged in")
             return
-        splitData = data.split()
-        if len(splitData) != 3:
+        if len(data) != 3:
             logError("Transaction is not of the correct format")
             return
-        num = splitData[1]
-        numtickets = splitData[2]
+        num = data[1]
+        numtickets = data[2]
         if int(numtickets) > 1000 or int(numtickets) < 1:
             logError("Invalid number of tickets")
             return
         if (not(self.isValidServiceNumber(num))):
             logError("Invalid service number")
+            return
+        if (not(self.serviceAlreadyExists(num))):
+            logError("Service numebr already exists")
             return
         else:
             self.recordTransaction(
