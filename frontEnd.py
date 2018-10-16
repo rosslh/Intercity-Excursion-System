@@ -36,8 +36,9 @@ class FrontEnd:
         pass
 
     def logout(self, data):
-        # self.sessionType = None
-        pass
+        self.recordTransaction("EOS")
+        filePath.close()
+        self.sessionType = -1
 
     def createService(self, data):
         pass
@@ -46,7 +47,17 @@ class FrontEnd:
         pass
 
     def sellTicket(self, data):
-        pass
+    splitData = data.split()
+    if len(splitData) != 3:
+        logError("Transaction is not of the correct format")
+    num = splitData[1]
+    numtickets = splitData[2]
+    if int(numtickets) > 1000 or int(numtickets) < 1:
+        logError("Invalid number of tickets")
+    if (not(self.isValidServiceNumber(num))):
+        logError("Invalid service number")
+    else:
+        self.recordTransaction("SEL %s %s 00000 **** 0"%(num, numtickets)) 
 
     def cancelTicket(self, data):
         pass
