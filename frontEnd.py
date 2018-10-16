@@ -48,10 +48,8 @@ class FrontEnd:
             logError("Invalid login")
 
     def logout(self, data):
-        if self.sessionType == -1:
-            logError("Not logged in")
-            return
-        self.recordTransaction(data)
+        self.recordTransaction("EOS")
+        filePath.close()
         self.sessionType = -1
 
     def createService(self, data):
@@ -96,10 +94,18 @@ class FrontEnd:
             validServicesFile.close()
 
     def sellTicket(self, data):
-        if self.sessionType == -1:
-            logError("Not logged in")
-            return
-        pass
+        splitData = data.split()
+        if len(splitData) != 3:
+            logError("Transaction is not of the correct format")
+        num = splitData[1]
+        numtickets = splitData[2]
+        if int(numtickets) > 1000 or int(numtickets) < 1:
+            logError("Invalid number of tickets")
+        if (not(self.isValidServiceNumber(num))):
+            logError("Invalid service number")
+        else:
+            self.recordTransaction(
+                "SEL %s %s 00000 **** 0" % (num, numtickets))
 
     def cancelTicket(self, data):
         if self.sessionType == -1:
