@@ -48,6 +48,9 @@ class FrontEnd:
             logError("Invalid login")
 
     def logout(self, data):
+        if self.sessionType != "agent" or self.sessionType != "planner":
+            logError("Must be logged in")
+            return
         self.recordTransaction("EOS")
         filePath.close()
         self.sessionType = -1
