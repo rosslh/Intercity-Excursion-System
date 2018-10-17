@@ -1,7 +1,8 @@
 '''
 This program is the front end of a system which provides an interface for transactions for transport tickets.
 The program takes a valid services list as input and outputs a transaction summary file.
-It is designed to be run using a command line providing it with text.'''
+It is designed to be run using a command line providing it with text.
+'''
 
 from __future__ import print_function
 import argparse
