@@ -1,7 +1,7 @@
-'''comment at beginning of main program, documenting:
-overall program intention,
-input and output files,
-how the program is intended to be run'''
+'''
+This program is the front end of a system which provides an interface for transactions for transport tickets.
+The program takes a valid services list as input and outputs a transaction summary file.
+It is designed to be run using a command line providing it with text.'''
 
 from __future__ import print_function
 import argparse
@@ -107,12 +107,12 @@ class FrontEnd:
         if len(data) != 3:
             logError("Transaction is not of the correct format")
             return
-        num = data[1]
-        numtickets = data[2]
-        if int(numtickets) > 1000 or int(numtickets) < 1:
+        serviceNum = data[1]
+        numTickets = data[2]
+        if int(numTickets) > 1000 or int(numTickets) < 1:
             logError("Invalid number of tickets")
             return
-        if (not(self.isValidServiceNumber(num))):
+        if (not(self.isValidServiceNumber(serviceNum))):
             logError("Invalid service number")
             return
         else:
