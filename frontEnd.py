@@ -7,18 +7,25 @@ It is designed to be run using a command line providing it with text.
 from __future__ import print_function
 import argparse
 import sys
-
+import os
 
 # Class for the FrontEnd project
+
+
 class FrontEnd:
     numCancelledTickets = 0  # counts the number of tickets already cancelled
     numChangedTickets = 0  # counts the number of tickets already changed
     sessionType = -1  # indicates whether FrontEnd is logged in, and if so, whether it’s in planner mode or agent mode
 
     # initializes the FrontEnd object
-    def __init__(self, services):
-        while (True):
-            line = input("Transaction code: ").split(" ")
+    def __init__(self, services=[], transactionSummaryFile="", inputs=[]):
+        useCliForInput = len(inputs) == 0
+        self.transactionSummaryFile = transactionSummaryFile
+        while (useCliForInput or len(inputs) > 0):
+            if(useCliForInput):
+                line = input("Transaction code: ").split(" ")
+            else:
+                line = inputs.pop(0).split(" ")
             transactionCode = line[0]
             if(transactionCode == "login"):
                 self.login(line, services)
@@ -73,7 +80,6 @@ class FrontEnd:
         date = data[2]
         serviceName = data[3]
         if self.isValidService(serviceNumber, date, serviceName) and not self.serviceAlreadyExists(serviceNumber):
-            # self.validServicesFile.write(serviceNumber + '\n')
             self.recordTransaction(data)
         else:
             logError("Invalid service")
@@ -89,14 +95,10 @@ class FrontEnd:
         serviceNumber = data[1]
         date = data[2]
         serviceName = data[3]
-        # placeholder date
+
         if self.isValidService(serviceNumber, date, serviceName) and self.serviceAlreadyExists(serviceNumber):
             self.recordTransaction(data)
-            # listOfServices = self.validServicesFile.readlines()
 
-            # for service in listOfServices:
-            #     if service != (serviceNumber + '\n'):
-            #         self.validServicesFile.write(service)
         else:
             logError("Invalid service")
 
@@ -207,7 +209,10 @@ class FrontEnd:
     # records a transaction to the transaction summary file
     def recordTransaction(self, transaction):
         output = ""
-        filePath = "transactionSummaryFile.txt"
+        if (len(self.transactionSummaryFile) > 0):
+            filePath = self.transactionSummaryFile
+        else:
+            filePath = "./transactionSummaryFile.txt"
         if (transaction[0] == "changeticket"):
             output = "CHG " + " ".join(transaction[1:]) + "\n"
         else:
@@ -223,13 +228,44 @@ def logError(*args, **kwargs):
 
 
 # Instantiates the FrontEnd object. Takes the location of the valid services file as a command-line argument
-def main():
+def main(vsf=None, tsf=None, inputFile=""):
     parser = argparse.ArgumentParser(description='Initiatiate the front end')
-    parser.add_argument("--services", type=str,
+    parser.add_argument("--vsf", type=str,
                         help="The absolute location of the valid services file")
+    parser.add_argument("--tsf", type=str,
+                        help="The absolute location of the transaction summary file")
     arguments = parser.parse_args()
-    with open(arguments.services) as services:
-        FrontEnd(services.read().split("\n"))
+    if (vsf != None):
+        services = vsf
+    else:
+        services = arguments.vsf
+    if (tsf != None):
+        summary = tsf
+    else:
+        summary = arguments.tsf
+    inp = []
+    if(len(inputFile) > 0):
+        with open(inputFile) as inputs:
+            inp = inputs.read().split("\n")
+    with open(services) as services:
+        FrontEnd(services.read().split("\n"), summary, inp)
 
 
-main()
+def test():
+    testFolders = os.listdir("./tests")
+    for folder in testFolders:
+        num = 1
+        try:
+            while(True):
+                inputFile = "./tests/" + folder + \
+                    "/inputs/input{}.txt".format(num)
+                outputFile = "./tests/" + folder + \
+                    "/outputs/output{}.txt".format(num)
+                main("./validServicesFile.txt", outputFile, inputFile)
+                num += 1
+        except FileNotFoundError:
+            pass
+
+
+# main()
+test()

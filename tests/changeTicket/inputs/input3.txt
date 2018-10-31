@@ -1,0 +1,3 @@
+login agent
+changeticket 12345 54321 21
+logout
