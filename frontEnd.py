@@ -262,6 +262,7 @@ def test():
                 outputFile = "./tests/" + folder + \
                     "/outputs/output{}.txt".format(num)
                 main("./validServicesFile.txt", outputFile, inputFile)
+                print("running test {} {}".format(folder, num))
                 num += 1
         except FileNotFoundError:
             pass
