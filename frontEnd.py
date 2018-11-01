@@ -13,12 +13,13 @@ import os
 
 
 class FrontEnd:
-    numCancelledTickets = 0  # counts the number of tickets already cancelled
-    numChangedTickets = 0  # counts the number of tickets already changed
-    sessionType = -1  # indicates whether FrontEnd is logged in, and if so, whether it’s in planner mode or agent mode
-
     # initializes the FrontEnd object
     def __init__(self, services=[], transactionSummaryFile="", inputs=[]):
+        self.numCancelledTickets = 0  # counts the number of tickets already cancelled
+        self.numChangedTickets = 0  # counts the number of tickets already changed
+        # indicates whether FrontEnd is logged in, and if so, whether it’s in planner mode or agent mode
+        self.sessionType = -1
+        self.deletedServiceNumbers = []
         useCliForInput = len(inputs) == 0
         self.transactionSummaryFile = transactionSummaryFile
         while (useCliForInput or len(inputs) > 0):
@@ -70,8 +71,8 @@ class FrontEnd:
 
     # creates a service, given a service number, date, and service name
     def createService(self, data):
-        if self.sessionType == -1:
-            logError("Not logged in")
+        if self.sessionType != "planner":
+            logError("Not logged in to planner mode ")
             return
         if len(data) != 4:
             logError("Invalid data entry")
@@ -86,8 +87,8 @@ class FrontEnd:
 
     #  deletes a service, given a service number, date, and service name
     def deleteService(self, data):
-        if self.sessionType == -1:
-            logError("Not logged in")
+        if self.sessionType != "planner":
+            logError("Not logged in to planner mode")
             return
         if len(data) != 4:
             logError("Invalid service for deleteService")
@@ -97,6 +98,7 @@ class FrontEnd:
         serviceName = data[3]
 
         if self.isValidService(serviceNumber, date, serviceName) and self.serviceAlreadyExists(serviceNumber):
+            self.deletedServiceNumbers.append(serviceNumber)
             self.recordTransaction(data)
 
         else:
@@ -115,13 +117,13 @@ class FrontEnd:
         if int(numTickets) > 1000 or int(numTickets) < 1:
             logError("Invalid number of tickets")
             return
-        if (not(self.isValidServiceNumber(serviceNum))):
+        if self.isValidServiceNumber(serviceNum) and self.serviceAlreadyExists(serviceNum):
+            self.recordTransaction(data)
+        else:
             logError("Invalid service number")
             return
-        else:
-            self.recordTransaction(data)
-
     #  takes a service number and the number of tickets and cancels that many tickets
+
     def cancelTicket(self, data):
         if self.sessionType == -1:
             logError("Not logged in")
@@ -131,17 +133,17 @@ class FrontEnd:
             return
         if self.serviceAlreadyExists(data[1]):
             if self.sessionType == "agent":
-                if int(data[2]) > 10:
+                if int(data[2])+self.numCancelledTickets > 10:
                     logError("Invalid ticket amount for agent")
-                elif self.numCancelledTickets >= 20:
-                    logError("Invalid ticket amount for planner")
                 else:
                     self.numCancelledTickets += int(data[2])
                     self.recordTransaction(data)
-
-            else:
+            elif self.sessionType == "planner":
                 self.numCancelledTickets += int(data[2])
                 self.recordTransaction(data)
+            else:
+                logError("Not logged in")
+                return
 
         else:
             logError("Invalid service number")
@@ -160,7 +162,8 @@ class FrontEnd:
         numTickets = int(data[3])
         if (self.numChangedTickets + numTickets >= 20 and self.sessionType != "planner"):
             logError("Too many changed tickets")
-        if (self.isValidServiceNumber(oldServiceNum) and self.isValidServiceNumber(newServiceNum)):
+        if (self.isValidServiceNumber(oldServiceNum) and self.isValidServiceNumber(newServiceNum)
+                and self.serviceAlreadyExists(oldServiceNum) and self.serviceAlreadyExists(newServiceNum)):
             self.numChangedTickets += numTickets
             self.recordTransaction(data)
         else:
@@ -168,6 +171,8 @@ class FrontEnd:
 
     #  returns boolean of whether a service number already exists in the valid services file
     def serviceAlreadyExists(self, serviceNumber):
+        if (serviceNumber in self.deletedServiceNumbers):
+            return False
         listOfNumbers = self.validServicesFile
         for line in listOfNumbers:
             if serviceNumber == line:
@@ -213,7 +218,9 @@ class FrontEnd:
             filePath = self.transactionSummaryFile
         else:
             filePath = "./transactionSummaryFile.txt"
-        if (transaction[0] == "changeticket"):
+        if ''.join(transaction) == "EOS":
+            output = "EOS\n"
+        elif transaction[0] == "changeticket":
             output = "CHG " + " ".join(transaction[1:]) + "\n"
         else:
             output = transaction[0][:3].upper() + " " + \
@@ -252,17 +259,18 @@ def main(vsf=None, tsf=None, inputFile=""):
 
 
 def test():
-    testFolders = os.listdir("./tests")
+    testFolders = os.listdir("./Tests")
     for folder in testFolders:
         num = 1
         try:
-            while(True):
-                inputFile = "./tests/" + folder + \
-                    "/inputs/input{}.txt".format(num)
-                outputFile = "./tests/" + folder + \
-                    "/outputs/output{}.txt".format(num)
-                main("./validServicesFile.txt", outputFile, inputFile)
+            while (True):
                 print("running test {} {}".format(folder, num))
+                inputFile = "./Tests/" + folder + \
+                    "/inputs/{}{}.txt".format(folder, num)
+                outputFile = "./Tests/" + folder + \
+                    "/outputs/{}{}.txt".format(folder, num)
+                open(outputFile, 'w').close()  # wipe file
+                main("./validServicesFile.txt", outputFile, inputFile)
                 num += 1
         except FileNotFoundError:
             pass

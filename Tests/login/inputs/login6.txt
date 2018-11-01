@@ -1,0 +1,3 @@
+sellticket 12345 10
+login agent
+logout
