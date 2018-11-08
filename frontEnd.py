@@ -276,5 +276,5 @@ def test():
             pass
 
 
-# main()
-test()
+main()
+# test()
