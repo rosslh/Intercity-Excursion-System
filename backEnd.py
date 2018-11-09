@@ -8,9 +8,15 @@ import os
 
 class BackEnd:
     def __init__(self, vsf, csf, tsf):
-        print(vsf)
-        print(csf)
-        print(tsf)
+        self.vsf = vsf
+        self.csf = csf
+        self.tsf = tsf
+        self.doSomething()
+
+    def doSomething(self):
+        print(self.vsf)
+        print(self.csf)
+        print(self.tsf)
         
 
 

@@ -66,7 +66,7 @@ class FrontEnd:
         if self.sessionType != "agent" and self.sessionType != "planner":
             logError("Must be logged in")
             return
-        self.recordTransaction("EOS")
+        self.recordEOS()
         self.sessionType = -1
 
     # creates a service, given a service number, date, and service name
@@ -81,7 +81,7 @@ class FrontEnd:
         date = data[2]
         serviceName = data[3]
         if self.isValidService(serviceNumber, date, serviceName) and not self.serviceAlreadyExists(serviceNumber):
-            self.recordTransaction(data)
+            self.recordTransaction(transactionCode="CRE", srcServiceNum=serviceNumber, serviceName=serviceName, serviceDate=date)
         else:
             logError("Invalid service")
 
@@ -99,7 +99,7 @@ class FrontEnd:
 
         if self.isValidService(serviceNumber, date, serviceName) and self.serviceAlreadyExists(serviceNumber):
             self.deletedServiceNumbers.append(serviceNumber)
-            self.recordTransaction(data)
+            self.recordTransaction(transactionCode="DEL", srcServiceNum=serviceNumber, serviceName=serviceName, serviceDate=date)
 
         else:
             logError("Invalid service")
@@ -118,7 +118,7 @@ class FrontEnd:
             logError("Invalid number of tickets")
             return
         if self.isValidServiceNumber(serviceNum) and self.serviceAlreadyExists(serviceNum):
-            self.recordTransaction(data)
+            self.recordTransaction(transactionCode="SEL", srcServiceNum=serviceNum, numTickets=numTickets)
         else:
             logError("Invalid service number")
             return
@@ -131,16 +131,17 @@ class FrontEnd:
         if len(data) != 3:
             logError("Invalid arguments")
             return
+        numCancelledTickets = int(data[2])+self.numCancelledTickets
         if self.serviceAlreadyExists(data[1]):
             if self.sessionType == "agent":
-                if int(data[2])+self.numCancelledTickets > 10:
+                if numCancelledTickets > 10:
                     logError("Invalid ticket amount for agent")
                 else:
                     self.numCancelledTickets += int(data[2])
-                    self.recordTransaction(data)
+                    self.recordTransaction(transactionCode="CAN", srcServiceNum=data[1], numTickets=numCancelledTickets)
             elif self.sessionType == "planner":
                 self.numCancelledTickets += int(data[2])
-                self.recordTransaction(data)
+                self.recordTransaction(transactionCode="CAN", srcServiceNum=data[1], numTickets=numCancelledTickets)
             else:
                 logError("Not logged in")
                 return
@@ -165,7 +166,7 @@ class FrontEnd:
         if (self.isValidServiceNumber(oldServiceNum) and self.isValidServiceNumber(newServiceNum)
                 and self.serviceAlreadyExists(oldServiceNum) and self.serviceAlreadyExists(newServiceNum)):
             self.numChangedTickets += numTickets
-            self.recordTransaction(data)
+            self.recordTransaction(transactionCode="CHG", srcServiceNum=oldServiceNum, destServiceNum=newServiceNum, numTickets=numTickets)
         else:
             logError("Invalid service number")
 
@@ -211,20 +212,21 @@ class FrontEnd:
         except TypeError:
             return False
 
-    # records a transaction to the transaction summary file
-    def recordTransaction(self, transaction):
-        output = ""
+    def recordEOS(self):
         if (len(self.transactionSummaryFile) > 0):
             filePath = self.transactionSummaryFile
         else:
             filePath = "./transactionSummaryFile.txt"
-        if ''.join(transaction) == "EOS":
-            output = "EOS\n"
-        elif transaction[0] == "changeticket":
-            output = "CHG " + " ".join(transaction[1:]) + "\n"
+        with open(filePath, "a+") as transactionFile:
+            transactionFile.write("EOS\n")
+    
+    # records a transaction to the transaction summary file
+    def recordTransaction(self, transactionCode="CCC", srcServiceNum="00000", numTickets="0", destServiceNum="00000", serviceName="****", serviceDate="0"):
+        if (len(self.transactionSummaryFile) > 0):
+            filePath = self.transactionSummaryFile
         else:
-            output = transaction[0][:3].upper() + " " + \
-                " ".join(transaction[1:]) + "\n"
+            filePath = "./transactionSummaryFile.txt"
+        output="{} {} {} {} {} {}\n".format(transactionCode, srcServiceNum, numTickets, destServiceNum, serviceName, serviceDate)
         with open(filePath, "a+") as transactionFile:
             transactionFile.write(output)
 
@@ -276,5 +278,5 @@ def test():
             pass
 
 
-main()
-# test()
+# main()
+test()
