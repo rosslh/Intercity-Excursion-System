@@ -29,6 +29,7 @@ class BackEnd:
                 for x in range(len(self.csf)):
                     if (self.csf[x][:5] == data[1]):
                         logError("Service number must not be in use")
+                        return
                 self.vsf.append(data[1])
                 self.csf.append(data[1]+' '+'30 0 '+data[4]+' '+data[5])
             else:
