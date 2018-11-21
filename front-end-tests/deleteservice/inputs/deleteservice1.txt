@@ -1,0 +1,3 @@
+login agent
+deleteservice 12345 20000101 service1
+logout

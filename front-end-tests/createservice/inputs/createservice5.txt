@@ -1,0 +1,3 @@
+login planner
+createservice 22222 181223 service1
+logout

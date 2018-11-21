@@ -1,0 +1,3 @@
+login agent
+cancelticket 22222 10
+logout

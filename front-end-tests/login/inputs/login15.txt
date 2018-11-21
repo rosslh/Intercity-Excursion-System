@@ -1,0 +1,3 @@
+login planner
+createservice 12121 20181223 service1
+logout

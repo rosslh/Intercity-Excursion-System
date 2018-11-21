@@ -1,0 +1,4 @@
+login agent
+login planner
+createservice 12345 20181223 service1
+logout

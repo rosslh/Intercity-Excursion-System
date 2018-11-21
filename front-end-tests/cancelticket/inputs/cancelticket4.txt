@@ -1,0 +1,5 @@
+login agent
+cancelticket 12345 8
+cancelticket 12345 7
+cancelticket 12345 9
+logout
