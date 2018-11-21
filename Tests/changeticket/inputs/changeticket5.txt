@@ -1,3 +1,0 @@
-login agent
-changeticket 12345 59094 1
-logout

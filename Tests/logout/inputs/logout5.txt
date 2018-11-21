@@ -1,4 +1,0 @@
-login agent
-logout
-sellticket 12345 22
-

@@ -1,3 +1,0 @@
-login agent
-sellticket 54321 10001
-logout

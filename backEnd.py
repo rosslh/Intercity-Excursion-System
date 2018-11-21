@@ -26,10 +26,17 @@ class BackEnd:
             elif (data[0] == 'EOS'):
                 self.writeFiles()
             elif (data[0] == 'CRE'):
+                self.logCoverage(29)
                 for x in range(len(self.csf)):
+                    self.logCoverage(31)
                     if (self.csf[x][:5] == data[1]):
+                        self.logCoverage(33)
                         logError("Service number must not be in use")
+                        self.logCoverage(35)
+                        return
+                self.logCoverage(37)
                 self.vsf.append(data[1])
+                self.logCoverage(39)
                 self.csf.append(data[1]+' '+'30 0 '+data[4]+' '+data[5])
             else:
                 for j in range(len(self.csf)):
@@ -53,11 +60,14 @@ class BackEnd:
                     else:
                         self.csf[service[0]] = ' '.join(service[1:])
                 elif (data[0] == 'CAN'):
+                    self.logCoverage(63)
                     service[3] = str(int(service[3]) - int(data[2]))
                     if int(service[3]) < 0:
+                        self.logCoverage(66)
                         logError("Number of tickets cannot be negative")
                         return
                     else:
+                        self.logCoverage(70)
                         self.csf[service[0]] = ' '.join(service[1:])
                 elif (data[0] == 'CHG'):
                     for k in range(len(self.csf)):
@@ -95,11 +105,18 @@ class BackEnd:
                         return
                     else:
                         f.write("%s\n" % service)
+    
+    def logCoverage(self, lineNum):
+        filename='./back-end-tests/backendCoverage.txt'
+        with open(filename, 'a') as f:
+            f.write("{}\n".format(lineNum))
+
+
 
 #prints a message to stderr
 def logError(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)               
-                
+
 #Main function opens the valid services, transaction summmary and central services input files and passes them to the BackEnd class
 def main():
     vsf = [line.rstrip('\n') for line in open("./validServicesFile.txt")]
@@ -107,4 +124,18 @@ def main():
     tsf = [line.rstrip('\n') for line in open("./transactionSummaryFile.txt")]
     BackEnd(vsf, csf, tsf)
 
-main()
+def test():
+    vsf = [line.rstrip('\n') for line in open("./back-end-tests/validServicesFile.txt")]
+    csf = [line.rstrip('\n') for line in open("./back-end-tests/centralServicesFile.txt")]
+    tsf = [line.rstrip('\n') for line in open("./back-end-tests/transactionSummaryFile1.txt")]
+    BackEnd(vsf, csf, tsf)
+    tsf = [line.rstrip('\n') for line in open("./back-end-tests/transactionSummaryFile2.txt")]
+    BackEnd(vsf, csf, tsf)
+    tsf = [line.rstrip('\n') for line in open("./back-end-tests/transactionSummaryFile3.txt")]
+    BackEnd(vsf, csf, tsf)
+    tsf = [line.rstrip('\n') for line in open("./back-end-tests/transactionSummaryFile4.txt")]
+    BackEnd(vsf, csf, tsf)
+
+# main()
+
+test()

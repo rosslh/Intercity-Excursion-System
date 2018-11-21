@@ -1,3 +1,0 @@
-login planner
-cancelticket 12345 40
-logout

@@ -1,3 +1,0 @@
-login agent
-logout
-createService 12345 20181223 service1

@@ -1,3 +1,0 @@
-login planner
-sellticket 12345 10
-logout

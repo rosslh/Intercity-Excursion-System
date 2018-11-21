@@ -1,4 +1,0 @@
-login planner
-deleteservice 12345 20000101 service1
-sellticket 12345 4
-logout

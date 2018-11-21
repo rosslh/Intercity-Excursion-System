@@ -1,3 +1,0 @@
-login planner
-createservice 0123 20181223 service1
-logout

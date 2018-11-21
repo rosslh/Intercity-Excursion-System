@@ -1,3 +1,0 @@
-login agent
-sellticket 12345 2
-logout

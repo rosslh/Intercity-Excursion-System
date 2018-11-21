@@ -1,3 +1,0 @@
-login planner
-createservice 22222 20181223 aa
-logout

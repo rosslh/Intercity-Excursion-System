@@ -267,9 +267,9 @@ def test():
         try:
             while (True):
                 print("running test {} {}".format(folder, num))
-                inputFile = "./Tests/" + folder + \
+                inputFile = "./front-end-tests/" + folder + \
                     "/inputs/{}{}.txt".format(folder, num)
-                outputFile = "./Tests/" + folder + \
+                outputFile = "./front-end-tests/" + folder + \
                     "/outputs/{}{}.txt".format(folder, num)
                 open(outputFile, 'w').close()  # wipe file
                 main("./validServicesFile.txt", outputFile, inputFile)

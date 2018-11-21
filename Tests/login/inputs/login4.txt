@@ -1,3 +1,0 @@
-createservice 12345 20181223 service1
-login planner
-logout
