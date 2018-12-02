@@ -11,7 +11,6 @@ class Driver:
             for filename in glob.glob("./transactionSummaryFiles/*"):
                 with open(filename, 'r') as readfile:
                     for line in readfile:
-                        print(line)
                         if "EOS" not in line:
                             outfile.write(line)
             outfile.write("EOS")
