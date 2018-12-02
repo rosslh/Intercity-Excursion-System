@@ -1,5 +1,5 @@
 import os
-ipmport glob
+import glob
 from frontEnd import main as frontEnd
 from backEnd import main as backEnd
 
