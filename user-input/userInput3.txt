@@ -1,0 +1,3 @@
+login planner
+deleteservice 22222 20181223 service1
+logout

@@ -27,9 +27,9 @@ class BackEnd:
                 self.writeFiles()
             elif (data[0] == 'CRE'):
                 self.logCoverage(29)
-                for x in range(len(self.csf)):
+                for x in self.csf:
                     self.logCoverage(31)
-                    if (self.csf[x][:5] == data[1]):
+                    if (x[:5] == data[1]):
                         self.logCoverage(33)
                         logError("Service number must not be in use")
                         self.logCoverage(35)
@@ -39,7 +39,7 @@ class BackEnd:
                 self.logCoverage(39)
                 self.csf.append(data[1]+' '+'30 0 '+data[4]+' '+data[5])
             else:
-                for j in range(len(self.csf)):
+                for j in range(len(self.csf) - 1):
                     if (self.csf[j][:5] == data[1]):
                         service = [j] + self.csf[j].split(' ')        
                 if (data[0] == 'DEL'):
@@ -64,6 +64,7 @@ class BackEnd:
                     service[3] = str(int(service[3]) - int(data[2]))
                     if int(service[3]) < 0:
                         self.logCoverage(66)
+                        print(service)
                         logError("Number of tickets cannot be negative")
                         return
                     else:
@@ -84,10 +85,10 @@ class BackEnd:
     #This method writes data to the new valid services and central services files
     def writeFiles(self):
         self.vsf.append('00000')
-        with open('./newValidServicesFile.txt', 'w') as f:
+        with open('./validServicesFile.txt', 'w') as f:
             for service in self.vsf:
                 f.write("%s\n" % service)
-        with open('./newCentralServicesFile.txt', 'w') as f:
+        with open('./centralServicesFile.txt', 'w') as f:
             for service in self.csf:
                 if len(service) > 0:
                     data = service.split()
@@ -118,10 +119,10 @@ def logError(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)               
 
 #Main function opens the valid services, transaction summmary and central services input files and passes them to the BackEnd class
-def main():
+def main(transactionSummaryFile="./transactionSummaryFile.txt"):
     vsf = [line.rstrip('\n') for line in open("./validServicesFile.txt")]
     csf = [line.rstrip('\n') for line in open("./centralServicesFile.txt")]
-    tsf = [line.rstrip('\n') for line in open("./transactionSummaryFile.txt")]
+    tsf = [line.rstrip('\n') for line in open(transactionSummaryFile)]
     BackEnd(vsf, csf, tsf)
 
 def test():
@@ -137,5 +138,4 @@ def test():
     BackEnd(vsf, csf, tsf)
 
 # main()
-
-test()
+# test()

@@ -14,10 +14,9 @@ import os
 
 class FrontEnd:
     # initializes the FrontEnd object
-    def __init__(self, services=[], transactionSummaryFile="", inputs=[]):
+    def __init__(self, services=[], transactionSummaryFile="./transactionSummaryFile", inputs=[]):
         self.numCancelledTickets = 0  # counts the number of tickets already cancelled
         self.numChangedTickets = 0  # counts the number of tickets already changed
-        # indicates whether FrontEnd is logged in, and if so, whether it’s in planner mode or agent mode
         self.sessionType = -1
         self.deletedServiceNumbers = []
         useCliForInput = len(inputs) == 0
@@ -83,7 +82,7 @@ class FrontEnd:
         if self.isValidService(serviceNumber, date, serviceName) and not self.serviceAlreadyExists(serviceNumber):
             self.recordTransaction(transactionCode="CRE", srcServiceNum=serviceNumber, serviceName=serviceName, serviceDate=date)
         else:
-            logError("Invalid service")
+            logError("Invalid service '{}'".format(serviceNumber))
 
     #  deletes a service, given a service number, date, and service name
     def deleteService(self, data):
@@ -213,19 +212,14 @@ class FrontEnd:
             return False
 
     def recordEOS(self):
-        if (len(self.transactionSummaryFile) > 0):
-            filePath = self.transactionSummaryFile
-        else:
-            filePath = "./transactionSummaryFile.txt"
+        filePath = self.transactionSummaryFile
+
         with open(filePath, "a+") as transactionFile:
             transactionFile.write("EOS\n")
     
     # records a transaction to the transaction summary file
     def recordTransaction(self, transactionCode="CCC", srcServiceNum="00000", numTickets="0", destServiceNum="00000", serviceName="****", serviceDate="0"):
-        if (len(self.transactionSummaryFile) > 0):
-            filePath = self.transactionSummaryFile
-        else:
-            filePath = "./transactionSummaryFile.txt"
+        filePath = self.transactionSummaryFile
         output="{} {} {} {} {} {}\n".format(transactionCode, srcServiceNum, numTickets, destServiceNum, serviceName, serviceDate)
         with open(filePath, "a+") as transactionFile:
             transactionFile.write(output)
@@ -237,13 +231,14 @@ def logError(*args, **kwargs):
 
 
 # Instantiates the FrontEnd object. Takes the location of the valid services file as a command-line argument
-def main(vsf=None, tsf=None, inputFile=""):
+def main(vsf="./validServicesFile.txt", tsf="./transactionSummaryFile.txt", inputFile=""):
     parser = argparse.ArgumentParser(description='Initiatiate the front end')
     parser.add_argument("--vsf", type=str,
                         help="The absolute location of the valid services file")
     parser.add_argument("--tsf", type=str,
                         help="The absolute location of the transaction summary file")
     arguments = parser.parse_args()
+    services = ""
     if (vsf != None):
         services = vsf
     else:
@@ -256,8 +251,9 @@ def main(vsf=None, tsf=None, inputFile=""):
     if(len(inputFile) > 0):
         with open(inputFile) as inputs:
             inp = inputs.read().split("\n")
+    open(tsg, 'w').close()  # wipe tsf file
     with open(services) as services:
-        FrontEnd(services.read().split("\n"), summary, inp)
+        FrontEnd(services=services.read().split("\n"), inputs=inp, transactionSummaryFile=summary)
 
 
 def test():
@@ -279,4 +275,4 @@ def test():
 
 
 # main()
-test()
+# test()
